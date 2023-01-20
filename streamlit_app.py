@@ -1,3 +1,16 @@
+"""The code is a Streamlit application that uses OpenCV's deep learning-based face detection capabilities. It starts by
+importing necessary libraries, including Streamlit (as st), OpenCV (as cv2), NumPy (as np), and PIL's Image class. It
+then creates an application title and a file uploader widget for the user to select an image. The code then defines
+several functions: detectFaceOpenCVDnn takes in a pre-trained deep learning model and an image, applies some
+pre-processing to the image, and uses the model to detect faces in the image. process_detections takes in the image,
+detections, and a confidence threshold, and draws bounding boxes around each detected face. load_model -  loads a
+pre-trained deep learning model for face detection and returns the model. get_image_download_link - generates a download
+link for the output image. It then uses the load_model function to load the deep learning model, and checks if a file has
+been uploaded. If so, it reads the file and converts it to an OpenCV image. It then displays the image in a Streamlit
+placeholder and creates a slider for the user to set the confidence threshold. It then uses the detectFaceOpenCVDnn
+and process_detections functions to detect faces in the image and draw bounding boxes around them. Finally, it displays
+the output image in another Streamlit placeholder and offers a download link for the output image.
+"""
 import streamlit as st
 import cv2
 import numpy as np
@@ -6,12 +19,13 @@ from io import BytesIO
 import base64
 
 # Create application title and file uploader widget.
-st.title("OpenCV Deep Learning based Face Detection")
+st.title("Face detection using OpenCV library - test version")
 img_file_buffer = st.file_uploader("Choose a file", type=['jpg', 'jpeg', 'png'])
 
 
-# Function for detecting facses in an image.
-def detectFaceOpenCVDnn(net, frame):
+# Function for detecting faces in an image.
+def detectFaceOpenCVDnn(net, frame):  # net - is an instance of deep learning network, imwage frame -
+#  will detect faces
     # Create a blob from the image and apply some pre-processing.
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), [104, 117, 123], False, False)
     # Set the blob as input to the model.
@@ -35,7 +49,8 @@ def process_detections(frame, detections, conf_threshold=0.5):
             x2 = int(detections[0, 0, i, 5] * frame_w)
             y2 = int(detections[0, 0, i, 6] * frame_h)
             bboxes.append([x1, y1, x2, y2])
-            bb_line_thickness = max(1, int(round(frame_h / 200)))
+            # If it is high or low resolution image, this code draws appropriate line
+            bb_line_thickness = max(1, int(round(frame_h / 200)))  # calculating bounding box line thickness
             # Draw bounding boxes around detected faces.
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), bb_line_thickness, cv2.LINE_8)
     return frame, bboxes
@@ -43,7 +58,7 @@ def process_detections(frame, detections, conf_threshold=0.5):
 
 # Function to load the DNN model.
 @st.cache(allow_output_mutation=True)
-def load_model():
+def load_model(): # function creates an instance of the neural network it's going to be used further below
     modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
     configFile = "deploy.prototxt"
     net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
